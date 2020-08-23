@@ -1,11 +1,5 @@
+![](screenshot.png)
 
-
-<li><strong>Every line of code is written and explained on video</strong></li>
-<li>Installing Android Studio</li>
-<li>How to plan the development of your apps</li>
-<li>Introduction to Android Studio</li>
-<li>Creating your first app</li>
-<li>Debugging tips and tricks and the android logcat</li>
 <li>Themes, color schemes, hex colors and styles</li>
 <li>Building Custom Toolbars</li>
 <li>Customizing Toolbar Behaviors with CoordinatorLayout and AppBarLayout</li>
