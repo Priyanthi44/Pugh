@@ -17,7 +17,7 @@ public interface NoteDao {
     @Insert
     long[] insertNotes(Note... notes);
 
-    @Query("SELECT * FROM notes")
+    @Query("SELECT * FROM stock")
     LiveData<List<Note>> getNotes();
 
     @Delete

@@ -7,7 +7,7 @@ import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-@Entity(tableName = "notes")
+@Entity(tableName = "stock")
 public class Note implements Parcelable {
 
     @PrimaryKey(autoGenerate = true)
@@ -25,11 +25,15 @@ public class Note implements Parcelable {
     @ColumnInfo(name = "quantity")
     private int quantity;
 
-    public Note(String title, String content, String timestamp, int quantity) {
+    @ColumnInfo(name = "minimum")
+    private int minimum;
+
+    public Note(String title, String content, String timestamp, int quantity, int minimum) {
         this.title = title;
         this.content = content;
         this.timestamp = timestamp;
         this.quantity = quantity;
+        this.minimum=minimum;
     }
 
     @Ignore
@@ -44,6 +48,7 @@ public class Note implements Parcelable {
         content = in.readString();
         timestamp = in.readString();
         quantity = in.readInt();
+        minimum=in.readInt();
     }
 
     public static final Creator<Note> CREATOR = new Creator<Note>() {
@@ -90,6 +95,22 @@ public class Note implements Parcelable {
         this.timestamp = timestamp;
     }
 
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public int getMinimum() {
+        return minimum;
+    }
+
+    public void setMinimum(int minimum) {
+        this.minimum = minimum;
+    }
+
     @Override
     public String toString() {
         return "Note{" +
@@ -97,6 +118,7 @@ public class Note implements Parcelable {
                 ", content='" + content + '\'' +
                 ", timestamp='" + timestamp + '\'' +
                 ", quantity='" + quantity + '\'' +
+                ", minimum='" + minimum + '\'' +
                 '}';
     }
 
@@ -112,5 +134,7 @@ public class Note implements Parcelable {
         parcel.writeString(title);
         parcel.writeString(content);
         parcel.writeString(timestamp);
+        parcel.writeInt(quantity);
+        parcel.writeInt(minimum);
     }
 }

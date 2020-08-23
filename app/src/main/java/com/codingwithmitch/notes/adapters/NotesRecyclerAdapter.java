@@ -1,6 +1,7 @@
 package com.codingwithmitch.notes.adapters;
 
 
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -45,6 +46,12 @@ public class NotesRecyclerAdapter extends RecyclerView.Adapter<NotesRecyclerAdap
             String timestamp = month + " " + year;
             holder.timestamp.setText(timestamp);
             holder.title.setText(mNotes.get(position).getTitle());
+            holder.model.setText(mNotes.get(position).getContent());
+            if(mNotes.get(position).getMinimum()>mNotes.get(position).getQuantity()){
+                holder.itemView.setBackgroundColor(Color.MAGENTA);
+            }else{
+                holder.itemView.setBackgroundColor(Color.red(R.color.mediumYellow));
+            }
         }catch (NullPointerException e){
             Log.e(TAG, "onBindViewHolder: Null Pointer: " + e.getMessage() );
         }
@@ -57,13 +64,14 @@ public class NotesRecyclerAdapter extends RecyclerView.Adapter<NotesRecyclerAdap
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        TextView timestamp, title;
+        TextView timestamp, title, model;
         OnNoteListener mOnNoteListener;
 
         public ViewHolder(View itemView, OnNoteListener onNoteListener) {
             super(itemView);
             timestamp = itemView.findViewById(R.id.note_timestamp);
             title = itemView.findViewById(R.id.note_title);
+            model =itemView.findViewById(R.id.model_no);
             mOnNoteListener = onNoteListener;
 
             itemView.setOnClickListener(this);

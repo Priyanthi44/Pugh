@@ -28,12 +28,18 @@ public class NotesListActivity extends AppCompatActivity implements
 
     private static final String TAG = "NotesListActivity";
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        retrieveNotes();
+    }
+
     // ui components
     private RecyclerView mRecyclerView;
 
     // vars
     private ArrayList<Note> mNotes = new ArrayList<>();
-    private NotesRecyclerAdapter mNoteRecyclerAdapter;
+    public NotesRecyclerAdapter mNoteRecyclerAdapter;
     private NoteRepository mNoteRepository;
 
 
@@ -49,9 +55,11 @@ public class NotesListActivity extends AppCompatActivity implements
         mNoteRepository = new NoteRepository(this);
         retrieveNotes();
 //        insertFakeNotes();
+        Toolbar mToolbar=(Toolbar)findViewById(R.id.notes_toolbar);
+        mToolbar.setLogo(R.mipmap.ic_launcher);
+        setSupportActionBar(mToolbar);
 
-        setSupportActionBar((Toolbar)findViewById(R.id.notes_toolbar));
-        setTitle("Notes");
+        setTitle(R.string.app_name);
     }
 
 
@@ -76,6 +84,7 @@ public class NotesListActivity extends AppCompatActivity implements
             note.setTitle("title #" + i);
             note.setContent("content #: " + i);
             note.setTimestamp("Jan 2019");
+            note.setQuantity(i);
             mNotes.add(note);
         }
         mNoteRecyclerAdapter.notifyDataSetChanged();

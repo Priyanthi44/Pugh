@@ -1,15 +1,20 @@
 package com.codingwithmitch.notes;
 
+import android.graphics.Color;
+import android.opengl.Visibility;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -30,11 +35,16 @@ public class NoteActivity extends AppCompatActivity implements
     private static final int EDIT_MODE_DISABLED = 0;
 
     // UI components
-    private LinedEditText mLinedEditText;
+    private EditText mLinedEditText;
     private EditText mEditTitle;
     private TextView mViewTitle;
+    private TextView mItems;
     private RelativeLayout mCheckContainer, mBackArrowContainer;
     private ImageButton mCheck, mBackArrow;
+    private EditText mMinQuantity;
+    private EditText mStock;
+    private EditText mChangeStock;
+    private LinearLayout mButtons;
 
 
     // vars
@@ -44,6 +54,11 @@ public class NoteActivity extends AppCompatActivity implements
     private int mMode;
     private NoteRepository mNoteRepository;
     private Note mNoteFinal;
+    private Button mbtnSell;
+    private Button mbtnBuy;
+
+
+
 
 
     @Override
@@ -57,6 +72,20 @@ public class NoteActivity extends AppCompatActivity implements
         mBackArrow = findViewById(R.id.toolbar_back_arrow);
         mCheckContainer = findViewById(R.id.check_container);
         mBackArrowContainer = findViewById(R.id.back_arrow_container);
+        mbtnSell=findViewById(R.id.btnsell);
+        mbtnBuy=findViewById(R.id.btnbuy);
+        mMinQuantity=findViewById(R.id.minquantity);
+        mStock=findViewById(R.id.stock);
+        mChangeStock=findViewById(R.id.quantity);
+        mItems=findViewById(R.id.items);
+        mButtons=findViewById(R.id.interact);
+
+        mStock.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                mItems.setText(mStock.getText().toString());
+            }
+        });
 
         mNoteRepository = new NoteRepository(this);
 
@@ -66,7 +95,7 @@ public class NoteActivity extends AppCompatActivity implements
             setNewNoteProperties();
             enableEditMode();
         }
-        else{
+        else {
             setNoteProperties();
             disableContentInteraction();
         }
@@ -90,11 +119,17 @@ public class NoteActivity extends AppCompatActivity implements
 
     private void setListeners(){
         mGestureDetector = new GestureDetector(this, this);
+
         mLinedEditText.setOnTouchListener(this);
+        mStock.setOnTouchListener(this);
+        mMinQuantity.setOnTouchListener(this);
+
         mCheck.setOnClickListener(this);
         mViewTitle.setOnClickListener(this);
         mBackArrow.setOnClickListener(this);
         mEditTitle.addTextChangedListener(this);
+        mbtnBuy.setOnClickListener(this);
+        mbtnSell.setOnClickListener(this);
     }
 
     private boolean getIncomingIntent(){
@@ -106,6 +141,8 @@ public class NoteActivity extends AppCompatActivity implements
             mNoteFinal.setContent(mNoteInitial.getContent());
             mNoteFinal.setTimestamp(mNoteInitial.getTimestamp());
             mNoteFinal.setId(mNoteInitial.getId());
+            mNoteFinal.setQuantity(mNoteInitial.getQuantity());
+            mNoteFinal.setMinimum(mNoteInitial.getMinimum());
 
             mMode = EDIT_MODE_ENABLED;
             mIsNewNote = false;
@@ -122,6 +159,19 @@ public class NoteActivity extends AppCompatActivity implements
         mLinedEditText.setFocusableInTouchMode(false);
         mLinedEditText.setCursorVisible(false);
         mLinedEditText.clearFocus();
+
+        mStock.setKeyListener(null);
+        mStock.setFocusable(false);
+        mStock.setFocusableInTouchMode(false);
+        mStock.setCursorVisible(false);
+        mStock.clearFocus();
+
+        mMinQuantity.setKeyListener(null);
+        mMinQuantity.setFocusable(false);
+        mMinQuantity.setFocusableInTouchMode(false);
+        mMinQuantity.setCursorVisible(false);
+        mMinQuantity.clearFocus();
+
     }
 
     private void enableContentInteraction(){
@@ -129,12 +179,26 @@ public class NoteActivity extends AppCompatActivity implements
         mLinedEditText.setFocusable(true);
         mLinedEditText.setFocusableInTouchMode(true);
         mLinedEditText.setCursorVisible(true);
-        mLinedEditText.requestFocus();
+
+
+       mStock.setKeyListener(new EditText(this).getKeyListener());
+        mStock.setFocusable(true);
+        mStock.setFocusableInTouchMode(true);
+        mStock.setCursorVisible(true);
+
+        mMinQuantity.setKeyListener(new EditText(this).getKeyListener());
+        mMinQuantity.setFocusable(true);
+        mMinQuantity.setFocusableInTouchMode(true);
+        mMinQuantity.setCursorVisible(true);
+
     }
 
     private void enableEditMode(){
         mBackArrowContainer.setVisibility(View.GONE);
         mCheckContainer.setVisibility(View.VISIBLE);
+
+        mItems.setVisibility(View.GONE);
+        mButtons.setVisibility(View.GONE);
 
         mViewTitle.setVisibility(View.GONE);
         mEditTitle.setVisibility(View.VISIBLE);
@@ -148,6 +212,9 @@ public class NoteActivity extends AppCompatActivity implements
         Log.d(TAG, "disableEditMode: called.");
         mBackArrowContainer.setVisibility(View.VISIBLE);
         mCheckContainer.setVisibility(View.GONE);
+
+        mItems.setVisibility(View.VISIBLE);
+        mButtons.setVisibility(View.VISIBLE);
 
         mViewTitle.setVisibility(View.VISIBLE);
         mEditTitle.setVisibility(View.GONE);
@@ -165,13 +232,17 @@ public class NoteActivity extends AppCompatActivity implements
             mNoteFinal.setContent(mLinedEditText.getText().toString());
             String timestamp = Utility.getCurrentTimeStamp();
             mNoteFinal.setTimestamp(timestamp);
+            mNoteFinal.setMinimum(Integer.parseInt(mMinQuantity.getText().toString()));
+            mNoteFinal.setQuantity(Integer.parseInt(mStock.getText().toString()));
 
             Log.d(TAG, "disableEditMode: initial: " + mNoteInitial.toString());
             Log.d(TAG, "disableEditMode: final: " + mNoteFinal.toString());
 
             // If the note was altered, save it.
-            if(!mNoteFinal.getContent().equals(mNoteInitial.getContent())
-                    || !mNoteFinal.getTitle().equals(mNoteInitial.getTitle())){
+            if(!(mNoteFinal.getQuantity()==mNoteInitial.getQuantity())
+                    || !(mNoteFinal.getMinimum()==mNoteInitial.getMinimum())
+                    ||!mNoteFinal.getTitle().equals(mNoteInitial.getQuantity())
+                    ||!mNoteFinal.getContent().equals(mNoteInitial.getContent())){
                 Log.d(TAG, "disableEditMode: called?");
                 saveChanges();
             }
@@ -179,18 +250,23 @@ public class NoteActivity extends AppCompatActivity implements
     }
 
     private void setNewNoteProperties(){
-        mViewTitle.setText("Note Title");
-        mEditTitle.setText("Note Title");
+        mViewTitle.setText("Item Type");
+        mEditTitle.setText("Item Type");
 
         mNoteFinal = new Note();
         mNoteInitial = new Note();
-        mNoteInitial.setTitle("Note Title");
+        mNoteInitial.setTitle("Item Type");
     }
 
     private void setNoteProperties(){
         mViewTitle.setText(mNoteInitial.getTitle());
         mEditTitle.setText(mNoteInitial.getTitle());
         mLinedEditText.setText(mNoteInitial.getContent());
+        mStock.setText(String.valueOf(mNoteInitial.getQuantity()));
+        mMinQuantity.setText(String.valueOf(mNoteInitial.getMinimum()));
+        mChangeStock.setText("1");
+        mItems.setText(mStock.getText().toString());
+
     }
 
     @Override
@@ -249,6 +325,8 @@ public class NoteActivity extends AppCompatActivity implements
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.toolbar_back_arrow:{
+                if(!mIsNewNote)
+                    disableEditMode();
                 finish();
                 break;
             }
@@ -262,6 +340,31 @@ public class NoteActivity extends AppCompatActivity implements
                 mEditTitle.setSelection(mEditTitle.length());
                 break;
             }
+            case R.id.btnbuy:{
+                mItems.setTextColor(Color.GREEN);
+                int current= Integer.parseInt(mStock.getText().toString());
+                int newst= Integer.parseInt(mChangeStock.getText().toString());
+
+                mStock.setText(String.valueOf((current+newst)));
+                mItems.setText(mStock.getText().toString());
+                break;
+            }
+            case R.id.btnsell:{
+                int current= Integer.parseInt(mStock.getText().toString());
+                int newst= Integer.parseInt(mChangeStock.getText().toString());
+                mItems.setTextColor(getColor(R.color.colorPrimary));
+                if(current>newst){
+                mStock.setText(String.valueOf((current-newst)));
+                mItems.setText(mStock.getText().toString());
+                }
+                else {
+                    mStock.setText("0");
+                mItems.setText(String.valueOf(current));
+                }
+                break;
+            }
+            default:
+                throw new IllegalStateException("Unexpected value: " + view.getId());
         }
     }
 
@@ -298,10 +401,14 @@ public class NoteActivity extends AppCompatActivity implements
     @Override
     public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
         mViewTitle.setText(charSequence.toString());
+
+
+
     }
 
     @Override
     public void afterTextChanged(Editable editable) {
+
 
     }
 }
