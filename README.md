@@ -1,3 +1,6 @@
+![](Screenshot_1598150937.png)
+![](Screenshot_1598150946.png)
+![](Screenshot_1598150954.png)
 ![](screenshot.png)
 
 <li>Themes, color schemes, hex colors and styles</li>
